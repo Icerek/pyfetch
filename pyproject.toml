@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pypineofetch"
+version = "1.0.0"
+description = "A fast and customizable neofetch alternative written in Python"
+readme = "README.md"
+requires-python = ">=3.7"
+license = {text = "MIT"}
+dependencies = [
+    "psutil",
+    "py-cpuinfo",
+    "nvidia-ml-py"
+]
+
+[project.scripts]
+pyfetch = "pyfetch:main"
