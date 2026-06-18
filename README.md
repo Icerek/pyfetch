@@ -39,3 +39,5 @@ pyfetch windows - run pyfetch with windows
 if doesn't work, let me know
 my discord: dizort21
 (or googling)
+
+<img width="733" height="263" alt="изображение" src="https://github.com/user-attachments/assets/84c324f5-cae3-42b8-8b7c-0dcd75dde733" />
