@@ -1,3 +1,7 @@
+pip install pypineofetch
+
+OR if you cant install with pip:
+
 ENG:
 FOR START:
 unpack pyfetch.py
