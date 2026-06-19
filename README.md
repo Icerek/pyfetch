@@ -33,7 +33,6 @@ pip3 install pypineofetch
 Once installed, simply run the following command in your terminal:
 pyfetch
 pyfetch macos - run pyfetch with macos
-pyfetch linux - run pyfetch with linux
 pyfetch windows - run pyfetch with windows
 
 if doesn't work, let me know
