@@ -5,6 +5,8 @@ import sys
 import re
 import platform
 import psutil
+import getpass
+import socket
 import subprocess
 from cpuinfo import get_cpu_info
 from pynvml import (
@@ -29,35 +31,57 @@ RESET = "\033[0m"
 # OS ASCII arts 
 LOGOS = {
     "Linux": fr"""         
- 
-   {GRAY} .--.{RESET}
-   {GRAY}|{RESET}o{YELLOW}_{RESET}o {GRAY}|{RESET}
-   {GRAY}|{RESET}{YELLOW}:_/{RESET} {GRAY}|{RESET}
-  {GRAY}//    \ \ {RESET}
- {GRAY}(|     | ){RESET}
-{YELLOW}/' \    / `\ {RESET}
-{YELLOW}\___)=(___/{RESET}""",
+{GRAY}            a8888b.{RESET}
+{GRAY}           d888888b.{RESET}
+{GRAY}           8P"YP"Y88{RESET}
+{GRAY}           8{RESET}|o||o|{GRAY}88{RESET}
+{GRAY}           8{RESET}{YELLOW}'    .{RESET}{GRAY}88{RESET}
+{GRAY}           8{RESET}{YELLOW}`._.' {RESET}{GRAY}Y8.{RESET}
+{GRAY}          d/      `8b.{RESET}
+{GRAY}         dP{RESET}   .    {GRAY}Y8b.{RESET}
+{GRAY}        d8:{RESET}'  "  `::{GRAY}88b{RESET}
+{GRAY}       d8{RESET}"         '{GRAY}Y88b{RESET}
+{GRAY}      :8P{RESET}    '      :{GRAY}888{RESET}
+{GRAY}       8a{RESET}.   :     _{GRAY}a88P{RESET}
+{YELLOW}     ._/"Y{RESET}aa_:   .{YELLOW}./\/\/\{RESET}
+{YELLOW}     \    Y{RESET}P"    `{YELLOW}|      '{RESET}
+{YELLOW}     /     \{RESET}.___.d{YELLOW}|    .'{RESET}
+{YELLOW}     `--..__){RESET}{GRAY}8888P{RESET}{YELLOW}`._.' {RESET}
+  """,
     "Windows": fr"""
-{RED}⠀⠀⠀  ⣴⣾⣿⣿⣿⣿⣿⣶⡄{RESET}
-{RED}⠀⠀⠀⢀⣿⣿⣿⣿⣿⣿⣿⣿⣿{RESET}{GREEN}⠀⠀⢰⣦⣄⣀⣀⣠⣴⣾⣿{RESET}⠀
-{RED}⠀⠀⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⡏{RESET}{GREEN}⠀⠀⣼⣿⣿⣿⣿⣿⣿⣿⣿⠀{RESET}⠀
-{RED}⠀⠀⠀⣼⣿⡿⠿⠛⠻⠿⣿⣿⡇{RESET}{GREEN}⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⡿⠀{RESET}⠀
-{RED}⠀⠀⠀⠉⠀⠀⠀ ⠀⠀⠀⠈⠁{RESET}{GREEN}⠀⢰⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀{RESET}⠀
-{YELLOW}⠀⠀⣠⣴⣶⣿⣿⣿⣷⣶⣤{RESET}{GREEN}  ⠈⠉⠛⠛⠛⠉⠉ {RESET} ⠀ 
-{YELLOW}⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⡇{RESET}{BLUE}⠀⠀⣶⣦⣄⣀⣀⣀⣤⣤⣶⠀{RESET}⠀⠀
-{YELLOW}⠀⣾⣿⣿⣿⣿⣿⣿⣿⣿⡇{RESET}{BLUE}⠀⢀⣿⣿⣿⣿⣿⣿⣿⣿⡟⠀{RESET}⠀⠀
-{YELLOW}⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⠁{RESET}{BLUE}⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀{RESET}⠀⠀
-{YELLOW}⢠⣿⡿⠿⠛⠉⠉⠉⠛⠿⠀{RESET}{BLUE}⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⠁⠀{RESET}⠀⠀
-{YELLOW}⠘⠉⠀{RESET}⠀⠀⠀⠀⠀⠀⠀⠀{BLUE}⠀⠻⢿⣿⣿⣿⣿⣿⠿⠛⠀⠀{RESET}⠀⠀
+{GREEN}                    ....,,:;+ccllll{RESET}
+{RED}      ...,,+:;{RESET}  {GREEN}cllllllllllllllllll{RESET}
+{RED},cclllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+{RED}llllllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+{RED}llllllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+{RED}llllllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+{RED}llllllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+{RED}llllllllllllll{RESET}  {GREEN}lllllllllllllllllll{RESET}
+
+{BLUE}llllllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}llllllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}llllllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}llllllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}llllllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}`'ccllllllllll{RESET}  {YELLOW}lllllllllllllllllll{RESET}
+{BLUE}       `' \\*::{RESET}{YELLOW}  :ccllllllllllllllll{RESET}
+{YELLOW}                       ````''*::cll{RESET}
+{YELLOW}                                 ``⠀{RESET}
 """,
     "Darwin": fr"""
-{GREEN}            .:'{RESET}
-{GREEN}        __ :'__{RESET}
-{YELLOW}     .'`  {RESET}{GREEN}`-'{RESET}{YELLOW}  ``.{RESET}
-{ORANGE}    :           .-'{RESET}
-{RED}    :          :{RESET}
-{MAGENTA}     :          `-;{RESET}
-{BLUE}      `.__.-.__.'{RESET}
+{GREEN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⠀⠀⠀⠀⠀{RESET}⠀
+{GREEN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡿⠀⠀⠀⠀⠀{RESET}⠀
+{GREEN}⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣾⣿⣿⠟⠁⠀⠀⠀⠀⠀{RESET}⠀
+{GREEN}⠀⠀⠀⢀⣠⣤⣤⣤⣀⣀⠈⠋⠉⣁⣠⣤⣤⣤⣀⡀⠀{RESET}⠀
+{YELLOW}⠀⢠⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣦⡀{RESET}
+{YELLOW}⣠⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠋⠀{RESET}
+{ORANGE}⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠀⠀{RESET}⠀
+{ORANGE}⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀{RESET}⠀
+{RED}⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀{RESET}
+{RED}⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣤⣀{RESET}
+{MAGENTA}⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠁{RESET}
+{MAGENTA}⠀⠀⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡟⠁⠀{RESET}
+{BLUE}⠀⠀⠀⠈⠙⢿⣿⣿⣿⠿⠟⠛⠻⠿⣿⣿⣿⡿⠋⠀⠀⠀{RESET}
 """,  
     "Unknown": """
 UNKNOWN OPERATING SYSTEM
@@ -201,12 +225,12 @@ def cpu_get():
             freq_info = f"{current_ghz} / {max_ghz} GHz"
         else:
             freq_info = "Unknown Freq"
-        info_lines.append(f"CPU: {cpu_brand} | {freq_info} | {platform.machine()}")
+        info_lines.append(f"CPU: {cpu_brand} | {freq_info}")
     except Exception:
         info_lines.append("CPU: Unknown")
 
 
-def gpu_get(target_os): 
+def gpu_get(target_os):   #GPU
     try:
         nvmlInit()
         handle = nvmlDeviceGetHandleByIndex(0)
@@ -228,7 +252,7 @@ def gpu_get(target_os):
             info_lines.append("GPU: Drivers not found or non-NVIDIA card")
 
 
-def get_ram():
+def get_ram():         #ram (1024**2 = megabyte 1024**3 = gigabyte)
     ram = psutil.virtual_memory()
     info_lines.append(
         f"Memory: {ram.used // (1024**2)} / {ram.total // (1024**2)} MB"
@@ -240,15 +264,22 @@ def get_disk(target_os):
         path = "C:\\" if target_os == "Windows" else "/"
         disk = psutil.disk_usage(path)
         
-        used_gb = disk.used // (1024**2)
-        total_gb = disk.total // (1024**2)
+        used_gb = disk.used // (1024**3)
+        total_gb = disk.total // (1024**3)
         
         info_lines.append(f"Disk ({path}): {used_gb} / {total_gb} GB")
     except Exception:
         info_lines.append("Disk: Unknown")
 
+def get_name():            #pc name and user name
+    try:
+        namepc = socket.gethostname()
+        login_name = getpass.getuser()
+        info_lines.append(f"Name: {login_name}@{namepc}")
+    except Exception as e:
+        info_lines.append(f"error{e}")
 
-def get_shell(target_os):
+def get_shell(target_os):  #shell 
     try:
         if target_os == "Windows":
             parent_name = psutil.Process(os.getppid()).name()
@@ -271,7 +302,7 @@ def get_shell(target_os):
 def wmthemeicons(target_os):        
     if target_os == "Linux":
         wm_theme = get_gsettings_value(
-            "org.cinnamon.desktop.wm.preferences", "theme"
+            "org.cinnamon.desktop.wm.preferences", "theme"        #only for linux wmtheme icons and theme
         )
         theme = get_gsettings_value("org.cinnamon.desktop.interface", "gtk-theme")
         icons = get_gsettings_value("org.cinnamon.desktop.interface", "icon-theme")
@@ -298,25 +329,26 @@ def main():
         if arg == "windows":
             current_os = "Windows"
         elif arg == "linux":
-            current_os = "Linux"
+            current_os = "Linux"                      #os select (pyfetch macos/windows/linux)
         elif arg in ["mac", "macos", "darwin"]:
             current_os = "Darwin"
 
     info_lines = []
 
-    if current_os == "Linux":
+    if current_os == "Linux":    #OS print
         try:
             os_info = platform.freedesktop_os_release()
-            info_lines.append(f"OS: {os_info['PRETTY_NAME']}")
+            info_lines.append(f"OS: {os_info['PRETTY_NAME']} | {platform.machine()}")
         except AttributeError:
-            info_lines.append(f"OS: {platform.system()} {platform.release()}")
+            info_lines.append(f"OS: {platform.system()} {platform.release()} | {platform.machine()}")
     elif current_os == "Windows":
-        info_lines.append(f"OS: Windows {platform.release()}")
+        info_lines.append(f"OS: Windows {platform.release()} | {platform.machine()}")
     elif current_os == "Darwin":
         mac_ver = platform.mac_ver()[0]
-        info_lines.append(f"OS: macOS {mac_ver}")
-       
+        info_lines.append(f"OS: macOS {mac_ver} | {platform.machine()}")
+    
     get_kernel()
+    get_name()
     info_lines.append(f"Host: {get_motherboard_info(current_os)}") 
     cpu_get() 
     gpu_get(current_os) 
