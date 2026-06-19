@@ -27,6 +27,7 @@ pipx install pypineofetch
 pip install pypineofetch
 or
 pip3 install pypineofetch
+for update - pip install --upgrade pypineofetch
 
 🚀 Usage
 
@@ -34,6 +35,11 @@ Once installed, simply run the following command in your terminal:
 pyfetch
 pyfetch macos - run pyfetch with macos
 pyfetch windows - run pyfetch with windows
+
+for update - pipx upgrade pypineofetch
+or reinstall
+pipx uninstall pyfetch
+pipx reinstall pypineofetch
 
 if doesn't work, let me know
 my discord: dizort21
