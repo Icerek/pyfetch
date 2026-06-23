@@ -9,7 +9,7 @@ pipx ensurepath
 # Restart your terminal, then run:
 pipx install pypineofetch
 
-###🐧 Linux (Arch Linux)
+### 🐧 Linux (Arch Linux)
 
 sudo pacman -S python-pipx
 pipx ensurepath
