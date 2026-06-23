@@ -3,14 +3,14 @@
 
 The recommended way to install `pypineofetch` is via **pipx**, as it isolates the application and its dependencies from your global system packages.
 
-### 🐧 Linux (Ubuntu, Mint, Debian, etc.)
+🐧 Linux (Ubuntu, Mint, Debian, etc.)
 
 sudo apt install pipx
 pipx ensurepath
 # Restart your terminal, then run:
 pipx install pypineofetch
 
-### 🐧 Linux (Arch Linux)
+🐧 Linux (Arch Linux)
 
 sudo pacman -S python-pipx
 pipx ensurepath
