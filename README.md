@@ -1,3 +1,4 @@
+```
 ## 📥 Installation
 
 The recommended way to install `pypineofetch` is via **pipx**, as it isolates the application and its dependencies from your global system packages.
